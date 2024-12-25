@@ -15,7 +15,10 @@ class Borrow extends Model
         'borrow_date',
         'return_date',
     ];
-
+    protected $casts = [
+        'borrow_date' => 'date', // Hoặc 'datetime' nếu có cả giờ
+        'return_date' => 'date', // Hoặc 'datetime' nếu có cả giờ
+    ];
     public function reader()
     {
         return $this->belongsTo(Reader::class);

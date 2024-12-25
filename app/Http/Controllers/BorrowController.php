@@ -9,62 +9,63 @@ use App\Models\Reader;
 
 class BorrowController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $borrows = Borrow::with('book', 'reader')->get();
+        $borrows = Borrow::paginate(10); // Phân trang với 15 bản ghi mỗi trang
+    
         return view('borrows.index', compact('borrows'));
     }
+
     public function create()
     {
         $books = Book::all();
         $readers = Reader::all();
         return view('borrows.create', compact('books', 'readers'));
     }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'book_id' => 'required|exists:books,id',
-            'reader_id' => 'required|exists:readers,id',
-            'borrow_date' => 'required|date',
-            'return_date' => 'nullable|date',
+        $validatedData = $request->validate([
+            'book_id' => 'required|integer|exists:books,id',
+            'reader_id' => 'required|integer|exists:readers,id',
+            'borrowed_date' => 'required|date',
+            'expected_return_date' => 'required|date|after:borrowed_date',
         ]);
 
-        Borrow::create($request->all());
-
-        return redirect()->route('borrows.index')->with('success', 'Thêm lượt mượn thành công.');
+        $borrow = Borrow::create($validatedData);
+        return redirect()->route('borrows.index')->with('success', 'Phiếu mượn sách đã được tạo!');
     }
-    public function show($id)
+
+    public function show(Borrow $borrow)
     {
-        $borrow = Borrow::with('book', 'reader')->findOrFail($id);
+        $borrow->load('book', 'reader'); // Eager loading (if not done in index)
         return view('borrows.show', compact('borrow'));
     }
-    public function edit($id)
+
+    public function edit(Borrow $borrow)
     {
-        $borrow = Borrow::findOrFail($id);
+        $borrow->load('book', 'reader'); // Eager loading (if needed)
         $books = Book::all();
         $readers = Reader::all();
         return view('borrows.edit', compact('borrow', 'books', 'readers'));
     }
-    public function update(Request $request, $id)
+
+    public function update(Request $request, Borrow $borrow)
     {
-        $request->validate([
-            'book_id' => 'required|exists:books,id',
-            'reader_id' => 'required|exists:readers,id',
-            'borrow_date' => 'required|date',
-            'return_date' => 'nullable|date',
+        $validatedData = $request->validate([
+            'book_id' => 'required|integer|exists:books,id',
+            'reader_id' => 'required|integer|exists:readers,id',
+            'borrow_date' => 'required|date', 
+            'return_date' => 'nullable|date|after_or_equal:borrowed_date', // Thêm validation cho return_date
         ]);
 
-        $borrow = Borrow::findOrFail($id);
-        $borrow->update($request->all());
-
-        return redirect()->route('borrows.index')->with('success', 'Cập nhật lượt mượn thành công.');
+        $borrow->update($validatedData);
+        return redirect()->route('borrows.index')->with('success', 'Phiếu mượn sách đã được cập nhật!');
     }
-    public function destroy($id)
+
+    public function destroy(Borrow $borrow)
     {
-        $borrow = Borrow::findOrFail($id);
         $borrow->delete();
-
-        return redirect()->route('borrows.index')->with('success', 'Xóa lượt mượn thành công.');
+        return redirect()->route('borrows.index')->with('success', 'Phiếu mượn sách đã được xóa!');
     }
-
 }
