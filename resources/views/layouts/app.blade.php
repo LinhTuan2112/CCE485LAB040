@@ -17,6 +17,11 @@
                     <li class="nav-item">
                         <a class="nav-link text-warning" href="{{ route('books.index') }}">Sách</a> <!-- Thêm màu cho văn bản -->
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::is('readers*') ? 'active' : '' }}" href="{{ route('readers.index') }}">Độc giả</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::is('borrows*') ? 'active' : '' }}" href="{{ route('borrows.index') }}">Mượn sách</a>
                 </ul>
             </div>
         </div>
