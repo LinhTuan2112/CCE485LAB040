@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('layout.parent')
 
 @section('title', 'Chi tiết phiếu mượn')
 
